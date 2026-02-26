@@ -66,9 +66,11 @@
     dot.style.top = mouseY + 'px';
   }
 
+  var RING_LERP = 0.15;
+
   function animateRing() {
-    ringX += (mouseX - ringX) * 0.15;
-    ringY += (mouseY - ringY) * 0.15;
+    ringX += (mouseX - ringX) * RING_LERP;
+    ringY += (mouseY - ringY) * RING_LERP;
     ring.style.left = ringX + 'px';
     ring.style.top = ringY + 'px';
     animationId = requestAnimationFrame(animateRing);
@@ -97,8 +99,10 @@
 (function initNavbar() {
   var navbar = document.getElementById('navbar');
 
+  var SCROLL_THRESHOLD = 60;
+
   function onScroll() {
-    if (window.scrollY > 60) {
+    if (window.scrollY > SCROLL_THRESHOLD) {
       navbar.classList.add('scrolled');
     } else {
       navbar.classList.remove('scrolled');
@@ -114,13 +118,16 @@
 (function initScrollReveal() {
   var elements = document.querySelectorAll('.reveal');
 
+  var REVEAL_THRESHOLD = 0.12;
+  var REVEAL_ROOT_MARGIN = '0px 0px -40px 0px';
+
   var observer = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
       }
     });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  }, { threshold: REVEAL_THRESHOLD, rootMargin: REVEAL_ROOT_MARGIN });
 
   elements.forEach(function (el) {
     observer.observe(el);
@@ -131,7 +138,13 @@
    SKILL BARS ANIMATION
 ============================================================ */
 (function initSkillBars() {
+  var SKILLBAR_THRESHOLD = 0.5;
   var bars = document.querySelectorAll('.skill-bar-fill');
+
+  bars.forEach(function (bar) {
+    var width = bar.dataset.width;
+    if (width) bar.style.setProperty('--target-width', width);
+  });
 
   var observer = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
@@ -139,7 +152,7 @@
         entry.target.classList.add('animated');
       }
     });
-  }, { threshold: 0.5 });
+  }, { threshold: SKILLBAR_THRESHOLD });
 
   bars.forEach(function (bar) {
     observer.observe(bar);
@@ -169,6 +182,7 @@
    PROJECT FILTER
 ============================================================ */
 (function initProjectFilter() {
+  var FILTER_FADE_MS = 300;
   var buttons = document.querySelectorAll('.filter-btn');
   var cards = document.querySelectorAll('.project-card');
 
@@ -192,7 +206,7 @@
             if (card.style.opacity === '0') {
               card.style.display = 'none';
             }
-          }, 300);
+          }, FILTER_FADE_MS);
         }
       });
     });
