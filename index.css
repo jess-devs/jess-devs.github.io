@@ -649,6 +649,14 @@ section {
     padding: 7rem 0;
 }
 
+#projects,
+#education {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 .section-label {
     font-size: 0.65rem;
     letter-spacing: 0.2em;
@@ -689,6 +697,10 @@ section {
        SKILLS
     ============================================================ */
 #skills {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     background: var(--surface);
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
@@ -954,6 +966,10 @@ section {
        EXPERIENCE
     ============================================================ */
 #experience {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     background: var(--surface);
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
@@ -1119,6 +1135,10 @@ section {
        CONTACT
     ============================================================ */
 #contact {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     text-align: center;
     padding: 8rem 0;
     position: relative;
