@@ -304,3 +304,68 @@
     });
   });
 })();
+
+/* ============================================================
+   CONTACT MODAL
+============================================================ */
+(() => {
+  const overlay = document.getElementById('contact-modal');
+  const openBtn = document.getElementById('open-contact-modal');
+  const closeBtn = document.getElementById('close-contact-modal');
+  const form = document.getElementById('contact-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const feedback = document.getElementById('form-feedback');
+
+  const open = () => {
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  };
+
+  const close = () => {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  };
+
+  openBtn.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.querySelector('.btn-text').hidden = true;
+    submitBtn.querySelector('.btn-loading').hidden = false;
+    feedback.hidden = true;
+    feedback.className = 'form-feedback';
+
+    const data = Object.fromEntries(new FormData(form));
+
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+
+      if (json.success) {
+        feedback.textContent = '¡Mensaje enviado! Te responderé pronto.';
+        feedback.className = 'form-feedback success';
+        form.reset();
+      } else {
+        throw new Error(json.message);
+      }
+    } catch {
+      feedback.textContent = 'Hubo un error al enviar. Intenta de nuevo.';
+      feedback.className = 'form-feedback error';
+    } finally {
+      feedback.hidden = false;
+      submitBtn.disabled = false;
+      submitBtn.querySelector('.btn-text').hidden = false;
+      submitBtn.querySelector('.btn-loading').hidden = true;
+    }
+  });
+})();
