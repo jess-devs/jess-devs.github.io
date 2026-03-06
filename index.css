@@ -7,7 +7,7 @@
     --border: #1e1e24;
     --muted: #2a2a32;
     --text-primary: #f0eff4;
-    --text-secondary: #7c7b8a;
+    --text-secondary: #9190a1;
     --text-tertiary: #4a4956;
     --accent: #e8ff47;
     --accent-dim: rgba(232, 255, 71, 0.08);
@@ -1383,6 +1383,12 @@ footer {
     }
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+        animation: none;
+    }
+}
+
 /* ============================================================
        RESPONSIVE
     ============================================================ */
@@ -1610,9 +1616,22 @@ button.contact-link {
     align-items: center;
     justify-content: center;
     padding: 1.5rem;
+    overflow-y: auto;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s var(--ease-out);
+}
+
+@media (max-width: 600px) {
+    .modal-overlay {
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    .modal-panel {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
 }
 
 .modal-overlay.open {

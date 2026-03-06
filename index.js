@@ -316,22 +316,43 @@
   const submitBtn = document.getElementById('submit-btn');
   const feedback = document.getElementById('form-feedback');
 
+  const FOCUSABLE = 'button:not([disabled]), input:not([disabled]):not([type="hidden"]):not([type="checkbox"]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  const trapFocus = (e) => {
+    if (e.key !== 'Tab') return;
+    const focusable = [...overlay.querySelectorAll(FOCUSABLE)];
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+
   const open = () => {
     overlay.classList.add('open');
     overlay.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
+    const firstInput = overlay.querySelector('input:not([type="hidden"]):not([type="checkbox"]), textarea');
+    if (firstInput) firstInput.focus();
+    overlay.addEventListener('keydown', trapFocus);
   };
 
   const close = () => {
     overlay.classList.remove('open');
     overlay.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    overlay.removeEventListener('keydown', trapFocus);
+    openBtn.focus();
   };
 
   openBtn.addEventListener('click', open);
   closeBtn.addEventListener('click', close);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay.classList.contains('open')) close(); });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
