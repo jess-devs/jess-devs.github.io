@@ -1648,10 +1648,12 @@ button.contact-link {
     position: relative;
     transform: translateY(16px);
     transition: transform 0.35s var(--ease-out);
+    pointer-events: none;
 }
 
 .modal-overlay.open .modal-panel {
     transform: translateY(0);
+    pointer-events: auto;
 }
 
 .modal-close {
