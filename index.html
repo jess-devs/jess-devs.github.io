@@ -637,7 +637,8 @@
       <h3 class="modal-title" id="modal-title">Enviar mensaje</h3>
       <label class="exp-tab-title">Te respondere el correo, con mucho gusto.</label>
       <form id="contact-form" novalidate>
-        <input type="hidden" name="access_key" value="KEY_AQUI" />
+        <input type="hidden" name="access_key" value="08e6495c-a5f7-49bd-b3cd-b9db27404adb" />
+        <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off" />
         <div class="form-group">
           <label for="from-subject">Asunto</label>
           <input type="text" id="from-subject" name="from_subject" required placeholder="¿En qué puedo ayudarte?" />
@@ -651,6 +652,7 @@
           <textarea id="message" name="message" required rows="5"
             placeholder="Cuéntame sobre tu proyecto..."></textarea>
         </div>
+        <div class="h-captcha" data-captcha="true"></div>
         <button type="submit" class="btn-submit" id="submit-btn">
           <span class="btn-text">Enviar mensaje</span>
           <span class="btn-loading" hidden>Enviando...</span>
@@ -660,6 +662,7 @@
     </div>
   </div>
 
+  <script src="https://web3forms.com/client/script.js" async defer></script>
   <script src="index.js"></script>
 </body>
 
