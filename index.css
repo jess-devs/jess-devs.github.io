@@ -1235,6 +1235,7 @@ section {
 .contact-link svg {
     width: 14px;
     height: 14px;
+    pointer-events: none;
 }
 
 /* ============================================================
