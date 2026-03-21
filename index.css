@@ -107,6 +107,9 @@ nav {
     right: 0;
     z-index: 50;
     padding: 1.5rem 2rem;
+    padding-top: calc(1.5rem + env(safe-area-inset-top));
+    padding-left: calc(2rem + env(safe-area-inset-left));
+    padding-right: calc(2rem + env(safe-area-inset-right));
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -259,6 +262,10 @@ nav.scrolled {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s var(--ease-out);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
 }
 
 .mobile-nav.open {
@@ -346,7 +353,7 @@ nav.scrolled {
 .hero-name {
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: clamp(3.5rem, 7vw, 6rem);
+    font-size: clamp(2rem, 9vw, 6rem);
     line-height: 0.95;
     letter-spacing: -0.03em;
     color: var(--text-primary);
@@ -438,8 +445,8 @@ nav.scrolled {
 /* ── Scroll to top ── */
 .scroll-top {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+    bottom: calc(2rem + env(safe-area-inset-bottom));
+    right: calc(2rem + env(safe-area-inset-right));
     width: 44px;
     height: 44px;
     background: var(--surface);
@@ -640,7 +647,7 @@ section {
 .section-title {
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-size: clamp(1.5rem, 7vw, 3.2rem);
     letter-spacing: -0.03em;
     line-height: 1.05;
     color: var(--text-primary);
@@ -1146,7 +1153,7 @@ section {
 .contact-big-title {
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: clamp(2.5rem, 7vw, 6rem);
+    font-size: clamp(1.8rem, 8vw, 6rem);
     letter-spacing: -0.04em;
     line-height: 1;
     color: var(--text-primary);
@@ -1205,6 +1212,7 @@ section {
 footer {
     border-top: 1px solid var(--border);
     padding: 2rem 0;
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom));
 }
 
 .footer-inner {
@@ -1445,11 +1453,14 @@ footer {
     /* Nav */
     nav {
         padding: 1.25rem 1.25rem;
+        padding-top: calc(1.25rem + env(safe-area-inset-top));
+        padding-left: calc(1.25rem + env(safe-area-inset-left));
+        padding-right: calc(1.25rem + env(safe-area-inset-right));
     }
 
     /* Hero */
     #hero {
-        padding-top: 5rem;
+        padding-top: calc(5rem + env(safe-area-inset-top));
     }
 
     .hero-inner {
@@ -1527,16 +1538,6 @@ footer {
     }
 }
 
-/* Small phones */
-@media (max-width: 380px) {
-    .hero-name {
-        font-size: 3rem;
-    }
-
-    .section-title {
-        font-size: 1.8rem;
-    }
-}
 
 /* ── Contact Modal ─────────────────────────────────────────── */
 
@@ -1568,13 +1569,17 @@ button.contact-link {
     .modal-overlay {
         align-items: flex-start;
         padding: 1rem;
+        padding-top: calc(1rem + env(safe-area-inset-top));
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+        padding-left: calc(1rem + env(safe-area-inset-left));
+        padding-right: calc(1rem + env(safe-area-inset-right));
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
     }
 
     .modal-panel {
-        margin-top: 1rem;
-        margin-bottom: 1rem;
+        margin-top: 0;
+        margin-bottom: 0;
     }
 }
 
