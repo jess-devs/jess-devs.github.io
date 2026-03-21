@@ -1,17 +1,4 @@
 /* ============================================================
-   TOUCH DEVICE — DISABLE CUSTOM CURSOR
-============================================================ */
-(function initTouchCursor() {
-  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-    document.body.style.cursor = 'auto';
-    var dot = document.getElementById('cursor-dot');
-    var ring = document.getElementById('cursor-ring');
-    if (dot) dot.style.display = 'none';
-    if (ring) ring.style.display = 'none';
-  }
-})();
-
-/* ============================================================
    HAMBURGER MENU
 ============================================================ */
 (function initHamburger() {
@@ -31,7 +18,7 @@
     link.addEventListener('click', function () {
       hamburger.classList.remove('open');
       mobileNav.classList.remove('open');
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     });
   });
 
@@ -39,57 +26,8 @@
     if (e.target === mobileNav) {
       hamburger.classList.remove('open');
       mobileNav.classList.remove('open');
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     }
-  });
-})();
-
-/* ============================================================
-   CURSOR
-============================================================ */
-(function initCursor() {
-  const dot = document.getElementById('cursor-dot');
-  const ring = document.getElementById('cursor-ring');
-
-  if (!dot || !ring || dot.style.display === 'none') return;
-
-  let mouseX = 0;
-  let mouseY = 0;
-  let ringX = 0;
-  let ringY = 0;
-  let animationId = null;
-
-  function onMouseMove(event) {
-    mouseX = event.clientX;
-    mouseY = event.clientY;
-    dot.style.left = mouseX + 'px';
-    dot.style.top = mouseY + 'px';
-  }
-
-  var RING_LERP = 0.15;
-
-  function animateRing() {
-    ringX += (mouseX - ringX) * RING_LERP;
-    ringY += (mouseY - ringY) * RING_LERP;
-    ring.style.left = ringX + 'px';
-    ring.style.top = ringY + 'px';
-    animationId = requestAnimationFrame(animateRing);
-  }
-
-  function onMouseEnterHoverable() {
-    document.body.classList.add('cursor-hover');
-  }
-
-  function onMouseLeaveHoverable() {
-    document.body.classList.remove('cursor-hover');
-  }
-
-  document.addEventListener('mousemove', onMouseMove);
-  animateRing();
-
-  document.querySelectorAll('a, button, .exp-tab, .skill-tag, .project-card').forEach(function (el) {
-    el.addEventListener('mouseenter', onMouseEnterHoverable);
-    el.addEventListener('mouseleave', onMouseLeaveHoverable);
   });
 })();
 
@@ -316,6 +254,31 @@
   const submitBtn = document.getElementById('submit-btn');
   const feedback = document.getElementById('form-feedback');
 
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function setFieldError(groupEl, errorEl, msg) {
+    if (msg) {
+      groupEl.classList.add('error');
+      errorEl.textContent = msg;
+    } else {
+      groupEl.classList.remove('error');
+      errorEl.textContent = '';
+    }
+  }
+
+  function clearFieldError(input) {
+    const group = input.closest('.form-group');
+    if (group) {
+      group.classList.remove('error');
+      const err = group.querySelector('.field-error');
+      if (err) err.textContent = '';
+    }
+  }
+
+  form.querySelectorAll('input, textarea').forEach(function (field) {
+    field.addEventListener('input', function () { clearFieldError(this); });
+  });
+
   const FOCUSABLE = 'button:not([disabled]), input:not([disabled]):not([type="hidden"]):not([type="checkbox"]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
   const trapFocus = (e) => {
@@ -335,7 +298,7 @@
   const open = () => {
     overlay.classList.add('open');
     overlay.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     const firstInput = overlay.querySelector('input:not([type="hidden"]):not([type="checkbox"]), textarea');
     if (firstInput) firstInput.focus();
     overlay.addEventListener('keydown', trapFocus);
@@ -344,7 +307,7 @@
   const close = () => {
     overlay.classList.remove('open');
     overlay.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
     overlay.removeEventListener('keydown', trapFocus);
     openBtn.focus();
   };
@@ -356,6 +319,45 @@
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    const subjectInput = form.querySelector('#from-subject');
+    const emailInput = form.querySelector('#from-email');
+    const messageInput = form.querySelector('#message');
+    const subjectGroup = subjectInput.closest('.form-group');
+    const emailGroup = emailInput.closest('.form-group');
+    const messageGroup = messageInput.closest('.form-group');
+    const subjectErr = document.getElementById('error-subject');
+    const emailErr = document.getElementById('error-email');
+    const messageErr = document.getElementById('error-message');
+
+    let valid = true;
+    setFieldError(subjectGroup, subjectErr, subjectInput.value.trim() ? '' : 'El asunto es obligatorio.');
+    if (!subjectInput.value.trim()) valid = false;
+
+    if (!emailInput.value.trim()) {
+      setFieldError(emailGroup, emailErr, 'El correo es obligatorio.');
+      valid = false;
+    } else if (!EMAIL_RE.test(emailInput.value.trim())) {
+      setFieldError(emailGroup, emailErr, 'Ingresa un correo válido.');
+      valid = false;
+    } else {
+      setFieldError(emailGroup, emailErr, '');
+    }
+
+    setFieldError(messageGroup, messageErr, messageInput.value.trim() ? '' : 'El mensaje es obligatorio.');
+    if (!messageInput.value.trim()) valid = false;
+
+    const captchaResponse = form.querySelector('[name="h-captcha-response"]');
+    const captchaErr = document.getElementById('error-captcha');
+    if (!captchaResponse || !captchaResponse.value) {
+      captchaErr.textContent = 'Por favor completa el captcha.';
+      valid = false;
+    } else {
+      captchaErr.textContent = '';
+    }
+
+    if (!valid) return;
+
     submitBtn.disabled = true;
     submitBtn.querySelector('.btn-text').hidden = true;
     submitBtn.querySelector('.btn-loading').hidden = false;
