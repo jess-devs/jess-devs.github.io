@@ -402,7 +402,7 @@ nav.scrolled {
     padding: 0.85rem 1.75rem;
     border-radius: 2px;
     border: none;
-    cursor: none;
+    cursor: pointer;
     transition: transform 0.2s var(--ease-out), box-shadow 0.2s;
 }
 
@@ -428,7 +428,7 @@ nav.scrolled {
     padding: 0.85rem 1.75rem;
     border-radius: 2px;
     border: 1px solid var(--border);
-    cursor: none;
+    cursor: pointer;
     transition: border-color 0.2s, color 0.2s, transform 0.2s var(--ease-out);
 }
 
@@ -803,7 +803,7 @@ section {
     border-radius: 2px;
     background: transparent;
     color: var(--text-tertiary);
-    cursor: none;
+    cursor: pointer;
     transition: all 0.2s;
 }
 
@@ -830,12 +830,14 @@ section {
     transition: background 0.2s;
     position: relative;
     overflow: hidden;
+    isolation: isolate;
 }
 
 .project-card::after {
     content: '';
     position: absolute;
     inset: 0;
+    z-index: -1;
     background: var(--accent-dim);
     opacity: 0;
     transition: opacity 0.3s;
@@ -928,6 +930,60 @@ section {
     font-size: 1rem;
     color: var(--accent);
     transition: transform 0.2s var(--ease-out);
+    text-decoration: none;
+}
+
+#projects-grid {
+    display: contents;
+}
+
+.project-skeleton {
+    pointer-events: none;
+}
+
+.sk-line {
+    background: linear-gradient(90deg, var(--surface) 25%, var(--muted) 50%, var(--surface) 75%);
+    background-size: 200% 100%;
+    animation: sk-shimmer 1.5s infinite linear;
+    border-radius: 2px;
+}
+
+.sk-title {
+    height: 1.1rem;
+    width: 55%;
+}
+
+.sk-desc {
+    height: 0.7rem;
+    width: 100%;
+    margin-top: 0.6rem;
+}
+
+.sk-desc.sk-short {
+    width: 70%;
+}
+
+.sk-tech {
+    height: 0.7rem;
+    width: 38%;
+    margin-top: 0.9rem;
+}
+
+@keyframes sk-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.projects-load-error {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    padding: 2.5rem 0;
+    grid-column: 1 / -1;
+}
+
+.projects-load-error a {
+    color: var(--accent);
+    text-decoration: none;
 }
 
 /* ============================================================
@@ -959,7 +1015,7 @@ section {
 .exp-tab {
     padding: 1.2rem 1.5rem;
     border-left: 2px solid var(--border);
-    cursor: none;
+    cursor: pointer;
     transition: all 0.2s;
 }
 
@@ -1229,6 +1285,29 @@ footer {
 .footer-tech {
     font-size: 0.7rem;
     color: var(--text-tertiary);
+}
+
+.footer-built-with {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+}
+
+.footer-built-label {
+    font-size: 0.65rem;
+    color: var(--text-tertiary);
+    opacity: 0.6;
+}
+
+.footer-built-tag {
+    font-size: 0.6rem;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-mid);
+    border-radius: 2px;
+    padding: 0.1rem 0.4rem;
+    letter-spacing: 0.05em;
 }
 
 .footer-tech span {

@@ -141,6 +141,8 @@
   elements.forEach(function (el) {
     observer.observe(el);
   });
+
+  window._revealObserver = observer;
 })();
 
 /* ============================================================
@@ -193,11 +195,11 @@
 (function initProjectFilter() {
   var FILTER_FADE_MS = 300;
   var buttons = document.querySelectorAll('.filter-btn');
-  var cards = document.querySelectorAll('.project-card');
 
   buttons.forEach(function (btn) {
     btn.addEventListener('click', function () {
       var filter = this.getAttribute('data-filter');
+      var cards = document.querySelectorAll('.project-card');
 
       document.querySelector('.filter-btn.active').classList.remove('active');
       this.classList.add('active');
@@ -241,6 +243,161 @@
       }
     });
   });
+})();
+
+/* ============================================================
+   GITHUB PROJECTS
+============================================================ */
+(function initGitHubProjects() {
+  var GITHUB_USER = 'jess-devs';
+  var API_URL = 'https://api.github.com/users/' + GITHUB_USER + '/repos?sort=updated&per_page=20';
+  var container = document.getElementById('projects-grid');
+  if (!container) return;
+
+  var BACKEND_KEYWORDS = ['java', 'python', 'csharp', 'c#', 'dotnet', '.net', 'backend',
+    'api', 'cli', 'desktop', 'sqlite', 'sql', 'discord', 'bot', 'kotlin', 'go', 'rust'];
+  var WEB_KEYWORDS = ['html', 'css', 'javascript', 'typescript', 'php', 'web', 'frontend',
+    'landing', 'portfolio', 'ecommerce', 'website', 'vue', 'react', 'svelte'];
+
+  function getCategory(repo) {
+    var tokens = (repo.topics || []).concat([((repo.language) || '').toLowerCase()]);
+    for (var i = 0; i < BACKEND_KEYWORDS.length; i++) {
+      if (tokens.indexOf(BACKEND_KEYWORDS[i]) !== -1) return 'backend';
+    }
+    for (var j = 0; j < WEB_KEYWORDS.length; j++) {
+      if (tokens.indexOf(WEB_KEYWORDS[j]) !== -1) return 'web';
+    }
+    return 'backend';
+  }
+
+  function getStatus(repo) {
+    if (repo.archived) return { label: 'Archivado', mod: 'status-dot--archived' };
+    var sixMonthsAgo = Date.now() - 6 * 30 * 24 * 60 * 60 * 1000;
+    if (new Date(repo.pushed_at).getTime() > sixMonthsAgo) return { label: 'Activo', mod: '' };
+    return { label: 'Concluido', mod: 'status-dot--concluded' };
+  }
+
+  function getTechs(repo) {
+    var techs = repo.language ? [repo.language] : [];
+    (repo.topics || []).forEach(function (t) {
+      if (techs.length < 3 && t.toLowerCase() !== (repo.language || '').toLowerCase()) {
+        techs.push(t);
+      }
+    });
+    return techs.slice(0, 3);
+  }
+
+  function buildCard(repo, index) {
+    var status = getStatus(repo);
+    var delays = ['', ' reveal-delay-1', ' reveal-delay-2'];
+    var card = document.createElement('div');
+    card.className = 'project-card reveal' + delays[index % 3];
+    card.setAttribute('data-category', getCategory(repo));
+
+    var num = document.createElement('span');
+    num.className = 'project-number';
+    num.textContent = String(index + 1).padStart(2, '0');
+
+    var title = document.createElement('h3');
+    title.className = 'project-title';
+    title.textContent = repo.name;
+
+    var desc = document.createElement('p');
+    desc.className = 'project-desc';
+    desc.textContent = repo.description || 'Sin descripción.';
+
+    var tech = document.createElement('div');
+    tech.className = 'project-tech';
+    getTechs(repo).forEach(function (t) {
+      var span = document.createElement('span');
+      span.textContent = t;
+      tech.appendChild(span);
+    });
+
+    var footer = document.createElement('div');
+    footer.className = 'project-footer';
+
+    var statusDiv = document.createElement('div');
+    statusDiv.className = 'project-status';
+    var dot = document.createElement('div');
+    dot.className = 'status-dot' + (status.mod ? ' ' + status.mod : '');
+    statusDiv.appendChild(dot);
+    statusDiv.appendChild(document.createTextNode(status.label));
+    footer.appendChild(statusDiv);
+
+    var url = repo.homepage || repo.html_url;
+    if (url) {
+      var link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.className = 'project-link-arrow';
+      link.setAttribute('aria-label', 'Ver proyecto');
+      link.textContent = '↗';
+      footer.appendChild(link);
+    }
+
+    card.appendChild(num);
+    card.appendChild(title);
+    card.appendChild(desc);
+    card.appendChild(tech);
+    card.appendChild(footer);
+    return card;
+  }
+
+  function showSkeleton() {
+    container.innerHTML = '';
+    for (var i = 0; i < 4; i++) {
+      var sk = document.createElement('div');
+      sk.className = 'project-card project-skeleton';
+      sk.innerHTML =
+        '<div class="sk-line sk-title"></div>' +
+        '<div class="sk-line sk-desc"></div>' +
+        '<div class="sk-line sk-desc sk-short"></div>' +
+        '<div class="sk-line sk-tech"></div>';
+      container.appendChild(sk);
+    }
+  }
+
+  function showError() {
+    container.innerHTML = '';
+    var msg = document.createElement('p');
+    msg.className = 'projects-load-error';
+    msg.textContent = 'No se pudieron cargar los proyectos. ';
+    var link = document.createElement('a');
+    link.href = 'https://github.com/' + GITHUB_USER;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = 'Ver en GitHub →';
+    msg.appendChild(link);
+    container.appendChild(msg);
+  }
+
+  showSkeleton();
+
+  fetch(API_URL)
+    .then(function (res) {
+      if (!res.ok) throw new Error('GitHub API ' + res.status);
+      return res.json();
+    })
+    .then(function (repos) {
+      var filtered = repos.filter(function (r) {
+        return !r.fork && r.name !== GITHUB_USER + '.github.io';
+      });
+      if (filtered.length === 0) { showError(); return; }
+
+      container.innerHTML = '';
+      filtered.slice(0, 8).forEach(function (repo, i) {
+        container.appendChild(buildCard(repo, i));
+      });
+
+      if (window._revealObserver) {
+        container.querySelectorAll('.reveal').forEach(function (el) {
+          window._revealObserver.observe(el);
+        });
+      }
+    })
+    .catch(showError);
 })();
 
 /* ============================================================
