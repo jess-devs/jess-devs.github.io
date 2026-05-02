@@ -42,6 +42,8 @@
       applyTheme(e.matches ? 'dark' : 'light');
     }
   });
+
+  window._themeVT = { toggle: toggleTheme };
 })();
 
 /* ============================================================
@@ -529,6 +531,8 @@
   closeBtn.addEventListener('click', close);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay.classList.contains('open')) close(); });
+
+  window._modalVT = { open: open, close: close };
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
