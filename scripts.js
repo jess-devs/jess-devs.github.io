@@ -1,4 +1,50 @@
 /* ============================================================
+   THEME
+============================================================ */
+(function initTheme() {
+  var html = document.documentElement;
+  var toggles = [
+    document.getElementById('theme-toggle'),
+    document.getElementById('theme-toggle-mobile')
+  ];
+  var STORAGE_KEY = 'theme';
+  var mqDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+  function getTheme() {
+    var stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === 'light' || stored === 'dark') return stored;
+    return mqDark.matches ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    toggles.forEach(function (btn) {
+      if (!btn) return;
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+    });
+  }
+
+  function toggleTheme() {
+    var current = html.getAttribute('data-theme') || getTheme();
+    var next = current === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(STORAGE_KEY, next);
+    applyTheme(next);
+  }
+
+  applyTheme(getTheme());
+
+  toggles.forEach(function (btn) {
+    if (btn) btn.addEventListener('click', toggleTheme);
+  });
+
+  mqDark.addEventListener('change', function (e) {
+    if (!localStorage.getItem(STORAGE_KEY)) {
+      applyTheme(e.matches ? 'dark' : 'light');
+    }
+  });
+})();
+
+/* ============================================================
    HAMBURGER MENU
 ============================================================ */
 (function initHamburger() {
@@ -466,7 +512,17 @@
     overlay.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
     overlay.removeEventListener('keydown', trapFocus);
+    setLoading(false);
+    feedback.hidden = true;
+    feedback.className = 'form-feedback';
+    feedback.textContent = '';
     openBtn.focus();
+  };
+
+  const setLoading = (loading) => {
+    submitBtn.disabled = loading;
+    submitBtn.querySelector('.btn-text').hidden = loading;
+    submitBtn.querySelector('.btn-loading').hidden = !loading;
   };
 
   openBtn.addEventListener('click', open);
@@ -476,6 +532,12 @@
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    if (submitBtn.disabled) return;
+
+    setLoading(true);
+    feedback.hidden = true;
+    feedback.className = 'form-feedback';
 
     const subjectInput = form.querySelector('#from-subject');
     const emailInput = form.querySelector('#from-email');
@@ -505,47 +567,55 @@
     if (!messageInput.value.trim()) valid = false;
 
     const captchaResponse = form.querySelector('[name="h-captcha-response"]');
+    const captchaEl = form.querySelector('.h-captcha');
     const captchaErr = document.getElementById('error-captcha');
-    if (!captchaResponse || !captchaResponse.value) {
+    const captchaLoaded = captchaEl && captchaEl.querySelector('iframe');
+
+    if (!captchaLoaded) {
+      captchaErr.textContent = 'El captcha aún está cargando. Espera un momento.';
+      valid = false;
+    } else if (!captchaResponse || !captchaResponse.value) {
       captchaErr.textContent = 'Por favor completa el captcha.';
       valid = false;
     } else {
       captchaErr.textContent = '';
     }
 
-    if (!valid) return;
-
-    submitBtn.disabled = true;
-    submitBtn.querySelector('.btn-text').hidden = true;
-    submitBtn.querySelector('.btn-loading').hidden = false;
-    feedback.hidden = true;
-    feedback.className = 'form-feedback';
+    if (!valid) {
+      setLoading(false);
+      return;
+    }
 
     const data = Object.fromEntries(new FormData(form));
 
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
       const res = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(data),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       const json = await res.json();
 
       if (json.success) {
         feedback.textContent = '¡Mensaje enviado! Te responderé pronto.';
         feedback.className = 'form-feedback success';
+        feedback.hidden = false;
         form.reset();
+        setTimeout(close, 2000);
       } else {
         throw new Error(json.message);
       }
-    } catch {
-      feedback.textContent = 'Hubo un error al enviar. Intenta de nuevo.';
+    } catch (err) {
+      feedback.textContent = err.name === 'AbortError'
+        ? 'La solicitud tardó demasiado. Intenta de nuevo.'
+        : 'Hubo un error al enviar. Intenta de nuevo.';
       feedback.className = 'form-feedback error';
-    } finally {
       feedback.hidden = false;
-      submitBtn.disabled = false;
-      submitBtn.querySelector('.btn-text').hidden = false;
-      submitBtn.querySelector('.btn-loading').hidden = true;
+      setLoading(false);
     }
   });
 })();
